@@ -1,38 +1,87 @@
-.App {
-  text-align: center;
-}
+@import '~antd/dist/antd.css';
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+#root {
+	height: 100%;
+	min-height: 100%;
 }
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.ant-layout {
+	min-height: 100%;
+	padding-bottom: 22px;
+	background: #f2f2f2;
 }
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.ant-layout-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	height: 52px;
+	line-height: 52px;
+	background: #fff;
+	box-shadow: 0 8px 24px -2px rgba(0, 0, 0, 0.05);
 }
-
-.App-link {
-  color: #61dafb;
+.site-layout .site-layout-background {
+	background: #fff;
+	padding: 25px;
+	box-shadow: 0 8px 24px -2px rgba(0, 0, 0, 0.05);
 }
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.box {
+	padding: 25px;
+	background: #fff;
+	border-radius: 2px;
+	margin-bottom: 22px;
+	box-shadow: 0 8px 24px -2px rgba(0, 0, 0, 0.05);
+}
+.controls {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 22px;
+	box-shadow: 0 8px 24px -2px rgba(0, 0, 0, 0.05);
+}
+.project-actions {
+	margin-bottom: 22px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+.alert-fixed {
+	position: fixed;
+	z-index: 999;
+	top: 30px;
+	right: 30px;
+	min-width: 200px;
+}
+.login {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	/* background: #f0f2f5; */
+	background: #f2f2f2;
+	padding: 0 15px;
+}
+.login-form {
+	max-width: 310px;
+	width: 100%;
+}
+.login-form .ant-input-prefix {
+	margin-right: 6px;
+}
+.login-form .site-form-item-icon {
+	color: rgba(0, 0, 0, 0.25);
+}
+.login .ant-alert {
+	margin-bottom: 25px;
+}
+.login-form-button {
+	width: 100%;
+}
+.btn-logout {
+	width: 100%;
+	text-align: left;
+	padding: 5px 12px;
+	border: none;
+}
+.ant-layout-header .ant-avatar {
+	cursor: pointer;
 }
