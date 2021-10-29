@@ -12,10 +12,10 @@ const Login = ({ onLogin }) => {
 	const onFinish = (values) => {
 		setIsLoading(true);
 		axios
-			.get('/sanctum/csrf-cookie')
+			.get('/csrf-cookie')
 			.then(() => {
 				axios
-					.post('/api/login', values)
+					.post('/login', values)
 					.then(({ data }) => {
 						localStorage.setItem('auth_name', data.name);
 						localStorage.setItem('auth_username', data.username);

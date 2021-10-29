@@ -12,7 +12,7 @@ const EditUser = () => {
 
 	React.useEffect(() => {
 		axios
-			.get(`/api/users/${id}/edit`)
+			.get(`/users/${id}/edit`)
 			.then(({ data }) => {
 				setInitValues(data);
 			})
@@ -26,7 +26,7 @@ const EditUser = () => {
 		setIsLoading(true);
 		const newUser = { ...values };
 		axios
-			.put(`/api/users/${id}`, newUser)
+			.put(`/users/${id}`, newUser)
 			.then(({ data }) => {
 				message.success(data.message);
 			})

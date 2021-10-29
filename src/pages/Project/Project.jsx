@@ -11,7 +11,7 @@ const Project = () => {
 
 	React.useEffect(() => {
 		axios
-			.get('/api/projects')
+			.get('/projects')
 			.then(({ data }) => {
 				setProjectList(data);
 			})
@@ -23,7 +23,7 @@ const Project = () => {
 		thisButton.innerText = 'Удаляю';
 
 		axios
-			.delete(`/api/projects/${projectId}`)
+			.delete(`/projects/${projectId}`)
 			.then(({ data }) => {
 				const newProjectList = projectList.filter((project) => project.id !== projectId);
 				setProjectList(newProjectList);
@@ -117,6 +117,7 @@ const Project = () => {
 						rowKey={(record) => record.id}
 						columns={columns}
 						dataSource={projectList}
+						pagination={{ hideOnSinglePage: true }}
 					/>
 				)}
 			</div>

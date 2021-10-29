@@ -10,7 +10,7 @@ const User = () => {
 
 	React.useEffect(() => {
 		axios
-			.get('/api/users')
+			.get('/users')
 			.then(({ data }) => {
 				setUserList(data);
 			})
@@ -22,7 +22,7 @@ const User = () => {
 		thisButton.innerText = 'Удаляю';
 
 		axios
-			.delete(`/api/users/${userId}`)
+			.delete(`/users/${userId}`)
 			.then(({ data }) => {
 				const newUserList = userList.filter((user) => user.id !== userId);
 				setUserList(newUserList);
@@ -89,6 +89,7 @@ const User = () => {
 						rowKey={(record) => record.id}
 						columns={columns}
 						dataSource={userList}
+						pagination={{ hideOnSinglePage: true }}
 					/>
 				)}
 			</div>

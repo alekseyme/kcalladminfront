@@ -52,7 +52,7 @@ export const fetchActiveProject = (parameters, activeProject) => (dispatch) => {
 	const params = parameters || { project: activeProject };
 
 	axios
-		.post('api/project/search', params)
+		.post('/project/search', params)
 		.then(({ data }) => {
 			const tableConfig = {
 				total: data.paginate.total,

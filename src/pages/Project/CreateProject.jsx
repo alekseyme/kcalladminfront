@@ -10,7 +10,7 @@ const CreateProject = () => {
 
 	React.useEffect(() => {
 		axios
-			.get('/api/users')
+			.get('/users')
 			.then(({ data }) => {
 				const newData = data.map((user) => {
 					return { label: user.name, value: user.id };
@@ -21,13 +21,10 @@ const CreateProject = () => {
 	}, []);
 
 	const onFinish = (values) => {
-		console.log(values);
-		console.log(projectUser);
 		const newProject = { ...values, users: projectUser };
-		console.log(newProject);
 		setIsLoading(true);
 		axios
-			.post('/api/projects', newProject)
+			.post('/projects', newProject)
 			.then(({ data }) => {
 				console.log(data);
 				message.success('Проект успешно добавлен');

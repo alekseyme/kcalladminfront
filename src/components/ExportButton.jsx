@@ -27,7 +27,7 @@ const ExportButton = ({ activeProject, searchParams }) => {
 			project: activeProject,
 		};
 		axios
-			.post('api/project/export', params)
+			.post('/project/export', params)
 			.then(({ data }) => exportToExcel(data, `export_${Date.now()}`))
 			.finally(() => setIsLoading(false));
 	};

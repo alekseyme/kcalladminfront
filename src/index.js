@@ -9,7 +9,8 @@ import ruRU from 'antd/lib/locale/ru_RU';
 
 import App from './App';
 
-axios.defaults.baseURL = 'http://localhost:8000';
+axios.defaults.baseURL = 'http://localhost:8000/api';
+// axios.defaults.baseURL = 'http://admin.kolocall.com/api';
 axios.defaults.withCredentials = true;
 axios.interceptors.request.use(function (config) {
 	const token = localStorage.getItem('auth_token');

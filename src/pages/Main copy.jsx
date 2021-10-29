@@ -32,7 +32,7 @@ const Main = () => {
 	//Подгрузка списка проектов, доступных для пользователя, в селект
 	React.useEffect(() => {
 		axios
-			.post('/api/userprojects', { isadmin: localStorage.getItem('auth_isadmin') === '1' })
+			.post('/userprojects', { isadmin: localStorage.getItem('auth_isadmin') === '1' })
 			.then(({ data }) => {
 				const projects = data.map((project) => {
 					return {
@@ -58,7 +58,7 @@ const Main = () => {
 		const params = parameters || { project: activeProject.value };
 
 		axios
-			.post('api/project/search', params)
+			.post('/project/search', params)
 			.then(({ data }) => {
 				const tableConfig = {
 					total: data.total,

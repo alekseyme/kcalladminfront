@@ -9,19 +9,12 @@ const User = () => {
 	const onFinish = (values) => {
 		setIsLoading(true);
 		axios
-			.get('/sanctum/csrf-cookie')
-			.then(() => {
-				console.log('csrf-cookie OK');
-				axios
-					.post('/api/users', values)
-					.then(({ data }) => {
-						console.log(data);
-						message.success('Пользователь успешно добавлен');
-					})
-					.catch((rsp) => {
-						console.log(rsp);
-						message.error('Произошла ошибка');
-					});
+			.post('/users', values)
+			.then(({ data }) => {
+				message.success(data.message);
+			})
+			.catch(() => {
+				message.error('Произошла ошибка');
 			})
 			.finally(() => setIsLoading(false));
 	};
@@ -35,7 +28,11 @@ const User = () => {
 				</Button>
 			</div>
 			<div className="box" style={{ marginTop: 20 }}>
-				<Form name="basic" onFinish={onFinish} autoComplete="off">
+				<Form
+					name="basic"
+					onFinish={onFinish}
+					initialValues={{ isadmin: false }}
+					autoComplete="off">
 					<Form.Item
 						label="Имя"
 						name="name"

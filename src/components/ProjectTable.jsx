@@ -74,7 +74,7 @@ const ProjectTable = () => {
 			};
 
 			axios
-				.put(`/api/project/editrow/${record.id}`, editRow)
+				.put(`/project/editrow/${record.id}`, editRow)
 				.then(({ data }) => {
 					message.success(data.message);
 					const newTableData = tableData.map((item) => {
@@ -181,6 +181,7 @@ const ProjectTable = () => {
 					total: tablePaginationConfig.total,
 					pageSize: tablePaginationConfig.per_page,
 					onChange: onChangeTablePage,
+					hideOnSinglePage: true,
 				}}
 			/>
 		</Form>

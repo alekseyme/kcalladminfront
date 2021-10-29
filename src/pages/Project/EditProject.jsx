@@ -14,7 +14,7 @@ const EditProject = () => {
 
 	React.useEffect(() => {
 		axios
-			.get('/api/users')
+			.get('/users')
 			.then(({ data }) => {
 				const newData = data.map((user) => {
 					return { label: user.name, value: user.id };
@@ -28,7 +28,7 @@ const EditProject = () => {
 
 	React.useEffect(() => {
 		axios
-			.get(`/api/projects/${id}/edit`)
+			.get(`/projects/${id}/edit`)
 			.then(({ data }) => {
 				setInitvalues(data);
 				if (data.users.length > 0) {
@@ -46,7 +46,7 @@ const EditProject = () => {
 		setIsLoading(true);
 		const newProject = { ...values, users: projectUser };
 		axios
-			.put(`/api/projects/${id}`, newProject)
+			.put(`/projects/${id}`, newProject)
 			.then(({ data }) => {
 				message.success(data.message);
 				// history.push('/projects');

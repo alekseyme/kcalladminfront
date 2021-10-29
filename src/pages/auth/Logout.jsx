@@ -11,7 +11,7 @@ const Logout = ({ onLogout }) => {
 	const handleLogout = () => {
 		setIsLoading(true);
 		axios
-			.post('/api/logout')
+			.post('/logout')
 			.then(() => {
 				localStorage.clear();
 				onLogout();
