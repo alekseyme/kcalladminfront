@@ -1,13 +1,15 @@
 import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import { Form, Input, Button, Checkbox, message } from 'antd';
 import axios from 'axios';
 import Loader from '../../components/Loader';
+import ResourceHeader from '../../components/ResourceHeader';
 
 const EditUser = () => {
 	const [isLoadingPage, setIsLoadingPage] = React.useState(true);
 	const [isLoading, setIsLoading] = React.useState(false);
 	const [initValues, setInitValues] = React.useState({});
+	let history = useHistory();
 	const { id } = useParams();
 
 	React.useEffect(() => {
@@ -16,7 +18,7 @@ const EditUser = () => {
 			.then(({ data }) => {
 				setInitValues(data);
 			})
-			.catch((err) => console.log(err))
+			.catch(() => message.error('Ошибка получения пользовательскх данных'))
 			.finally(() => {
 				setIsLoadingPage(false);
 			});
@@ -29,6 +31,7 @@ const EditUser = () => {
 			.put(`/users/${id}`, newUser)
 			.then(({ data }) => {
 				message.success(data.message);
+				history.push('/users');
 			})
 			.catch(() => {
 				message.error('Произошла ошибка');
@@ -38,13 +41,9 @@ const EditUser = () => {
 
 	return (
 		<>
-			<div className="controls box" style={{ padding: '14px 25px' }}>
-				<b>Редактировать пользователя</b>
-				<Button type="primary" style={{ marginLeft: 'auto' }}>
-					<Link to={'/users'}>Назад</Link>
-				</Button>
-			</div>
-			<div className="box" style={{ marginTop: 20 }}>
+			<ResourceHeader title="Редактировать пользователя" path="/users" lintText="Назад" />
+
+			<div className="box">
 				{isLoadingPage ? (
 					<Loader />
 				) : (

@@ -1,8 +1,9 @@
 import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import { Form, Input, Button, Checkbox, message, Select } from 'antd';
 import axios from 'axios';
 import Loader from '../../components/Loader';
+import ResourceHeader from '../../components/ResourceHeader';
 
 const EditProject = () => {
 	const [userList, setUsertList] = React.useState([]);
@@ -21,10 +22,10 @@ const EditProject = () => {
 				});
 				setUsertList(newData);
 			})
-			.finally(() => console.log('users fetched at edit page'));
+			.catch(() => message.error('Произошла ошибка'));
 	}, []);
 
-	// let history = useHistory();
+	let history = useHistory();
 
 	React.useEffect(() => {
 		axios
@@ -36,7 +37,7 @@ const EditProject = () => {
 					setProjectUser(projectUser);
 				}
 			})
-			.catch((err) => console.log(err))
+			.catch(() => message.error('Ошибка редактирования проекта'))
 			.finally(() => {
 				setIsLoadingPage(false);
 			});
@@ -49,9 +50,9 @@ const EditProject = () => {
 			.put(`/projects/${id}`, newProject)
 			.then(({ data }) => {
 				message.success(data.message);
-				// history.push('/projects');
+				history.push('/projects');
 			})
-			.catch((rsp) => {
+			.catch(() => {
 				message.error('Произошла ошибка');
 			})
 			.finally(() => setIsLoading(false));
@@ -63,13 +64,8 @@ const EditProject = () => {
 
 	return (
 		<>
-			<div className="controls box" style={{ padding: '14px 25px' }}>
-				<b>Редактировать проект</b>
-				<Button type="primary" style={{ marginLeft: 'auto' }}>
-					<Link to={'/projects'}>Назад</Link>
-				</Button>
-			</div>
-			<div className="box" style={{ marginTop: 20 }}>
+			<ResourceHeader title="Редактировать проект" path="/projects" lintText="Назад" />
+			<div className="box">
 				{isLoadingPage ? (
 					<Loader />
 				) : (

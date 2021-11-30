@@ -3,9 +3,13 @@ import { useHistory } from 'react-router-dom';
 import { Form, Input, Button, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import axios from 'axios';
+//Redux
+import { useDispatch } from 'react-redux';
+import { setUserInfo } from '../../redux/actions/projects';
 
 const Login = ({ onLogin }) => {
 	const [isLoading, setIsLoading] = React.useState(false);
+	const dispatch = useDispatch();
 
 	let history = useHistory();
 
@@ -18,11 +22,7 @@ const Login = ({ onLogin }) => {
 					.post('/login', values)
 					.then(({ data }) => {
 						localStorage.setItem('auth_name', data.name);
-						localStorage.setItem('auth_username', data.username);
-						if (data.isadmin) {
-							localStorage.setItem('auth_isadmin', data.isadmin);
-						}
-						localStorage.setItem('auth_token', data.token);
+						dispatch(setUserInfo(data));
 						onLogin();
 						history.push('/');
 					})

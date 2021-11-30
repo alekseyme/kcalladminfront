@@ -1,5 +1,5 @@
 import React from 'react';
-import { DatePicker, Form, Input, Button, Select, Table, BackTop, message } from 'antd';
+import { DatePicker, Form, Input, Button, Select, BackTop, message } from 'antd';
 import { PhoneOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import moment from 'moment';
@@ -9,78 +9,55 @@ import {
 	setActiveProject,
 	setTableColumns,
 	resetTableData,
-	setTableData,
-	setTablePaginationConfig,
 	setSearchParams,
-} from '../redux/actions/projects';
+	fetchActiveProject,
+	setProjectLoading,
+	setTableLoading,
+} from '../../redux/actions/projects';
 import { useSelector, useDispatch } from 'react-redux';
 
-import Loader from '../components/Loader';
-import ExportButton from '../components/ExportButton';
+import Loader from '../../components/Loader';
+import TableControls from '../../components/TableControls';
+import ProjectTable from '../../components/ProjectTable';
 
 const Main = () => {
 	//Redux
 	const dispatch = useDispatch();
-	const { activeProject, tableColumns, tableData, tablePaginationConfig, searchParams } =
-		useSelector(({ projects }) => projects);
-
-	const [tableLoading, setTableLoading] = React.useState(false);
+	const { activeProject, projectLoading, tableData, searchParams, projectStatuses } = useSelector(
+		({ projects }) => projects,
+	);
 	const [projectList, setProjectList] = React.useState(null);
-	const [isLoading, setIsLoading] = React.useState(false);
 	const [searchForm] = Form.useForm();
 
 	//Подгрузка списка проектов, доступных для пользователя, в селект
 	React.useEffect(() => {
-		axios
-			.post('/userprojects', { isadmin: localStorage.getItem('auth_isadmin') === '1' })
-			.then(({ data }) => {
-				const projects = data.map((project) => {
-					return {
-						id: project.id,
-						value: project.tablename,
-						label: project.name,
-						base_header: project.base_header,
-						base_row: project.base_row,
-					};
-				});
-				setProjectList(projects);
+		axios.post('/userprojects').then(({ data }) => {
+			const projects = data.map((project) => {
+				return {
+					id: project.id,
+					value: project.tablename,
+					label: project.name,
+					base_header: project.base_header,
+					base_row: project.base_row,
+				};
 			});
+			setProjectList(projects);
+		});
 	}, []);
 
 	//Меняем активный проект, при смене в селекте
 	React.useEffect(() => {
 		if (activeProject && !tableData) {
-			fetchActiveProject();
+			dispatch(fetchActiveProject(null, activeProject.value));
 		} // eslint-disable-next-line
 	}, [activeProject]);
-
-	const fetchActiveProject = (parameters) => {
-		const params = parameters || { project: activeProject.value };
-
-		axios
-			.post('/project/search', params)
-			.then(({ data }) => {
-				const tableConfig = {
-					total: data.total,
-					current_page: data.current_page,
-					per_page: data.per_page,
-				};
-				dispatch(setTablePaginationConfig(tableConfig));
-				dispatch(setTableData(data.data));
-			})
-			.catch(() => alert('ошибка запроса'))
-			.finally(() => {
-				setIsLoading(false);
-				setTableLoading(false);
-			});
-	};
 
 	const fetchSearchData = (fieldsValue) => {
 		if (!activeProject) {
 			message.warning('Сначала выберите проект', 2);
 			return;
 		}
-		if (!fieldsValue.from && !fieldsValue.to && !fieldsValue.phone) {
+		if (!fieldsValue.from && !fieldsValue.to && !fieldsValue.phone && !fieldsValue.status) {
 			message.warning('Заполните хотя бы один параметр поиска', 2);
 			return;
 		}
@@ -91,13 +68,14 @@ const Main = () => {
 			to: fieldsValue['to'] ? fieldsValue['to'].format('YYYY-MM-DD') : null,
 		};
 
-		setTableLoading(true);
+		dispatch(setTableLoading(true));
 		dispatch(
 			setSearchParams({
 				...searchParams,
 				from: values.from,
 				to: values.to,
 				phone: values.phone,
+				status: values.status,
 			}),
 		);
 		const parameters = {
@@ -105,8 +83,9 @@ const Main = () => {
 			from: values.from,
 			to: values.to,
 			phone: values.phone,
+			status: values.status,
 		};
-		fetchActiveProject(parameters);
+		dispatch(fetchActiveProject(parameters));
 	};
 
 	const resetSearch = async () => {
@@ -114,8 +93,36 @@ const Main = () => {
 		searchForm.resetFields();
 	};
 
+	const getTableRowWidth = (row) => {
+		switch (row) {
+			case 'id':
+				return 34; //def 50, mid 34
+			case 'time':
+				return 151; //def 168, mid 151
+			// case 'que':
+			// 	return 151; //def 168, mid 151
+			// case 'operator':
+			// 	return 151; //def 168, mid 151
+			// case 'typeo':
+			// 	return 151; //def 121, mid 105
+			// case 'status':
+			// 	return 151; //def 121, mid 105
+			// case 'number':
+			// 	return 105; //def 121, mid 105
+			// case 'name':
+			// 	return 105; //def 121, mid 105
+			// case 'phone_contact':
+			// 	return 105; //def 121, mid 105
+			case 'content':
+				return 300; //def 300, mid 300
+
+			default:
+				return 'auto';
+		}
+	};
+
 	const onSelectProject = (_, optionObj) => {
-		setIsLoading(true);
+		dispatch(setProjectLoading(true));
 		resetSearch();
 
 		const headerArr = optionObj.base_header.split(',');
@@ -124,26 +131,19 @@ const Main = () => {
 		const tableCols = headerArr.map((col, i) => ({
 			title: col,
 			dataIndex: rowArr[i],
-			// key: rowArr[i],
-			editable: true,
+			width: headerArr.length > 7 ? getTableRowWidth(rowArr[i]) : 148,
+			editable:
+				rowArr[i] === 'id' ||
+				rowArr[i] === 'time' ||
+				rowArr[i] === 'operator' ||
+				rowArr[i] === 'que'
+					? false
+					: true,
 		}));
 
 		dispatch(resetTableData());
 		dispatch(setActiveProject(optionObj));
 		dispatch(setTableColumns(tableCols));
-	};
-
-	const onChangeTablePage = (page, pageSize) => {
-		setTableLoading(true);
-		const parameters = {
-			project: activeProject.value,
-			page: page,
-			per_page: pageSize,
-			from: searchParams ? searchParams.from : null,
-			to: searchParams ? searchParams.to : null,
-			phone: searchParams ? searchParams.phone : null,
-		};
-		fetchActiveProject(parameters);
 	};
 
 	return (
@@ -163,6 +163,7 @@ const Main = () => {
 								? moment(searchParams.to, 'YYYY-MM-DD')
 								: null,
 						phone: searchParams ? searchParams.phone : null,
+						status: searchParams ? searchParams.status : null,
 					}}
 					layout="inline">
 					<Form.Item name="from">
@@ -183,6 +184,14 @@ const Main = () => {
 							allowClear
 						/>
 					</Form.Item>
+					<Form.Item name="status">
+						<Select
+							placeholder="Статус"
+							style={{ width: 202 }}
+							options={projectStatuses || null}
+							allowClear
+						/>
+					</Form.Item>
 					<Form.Item>
 						<Button type="primary" htmlType="submit">
 							Поиск
@@ -191,11 +200,10 @@ const Main = () => {
 					{searchParams && (
 						<Form.Item>
 							<Button
-								type="dashed"
 								onClick={() => {
-									setIsLoading(true);
+									dispatch(setProjectLoading(true));
 									resetSearch();
-									fetchActiveProject();
+									dispatch(fetchActiveProject(null, activeProject.value));
 								}}>
 								Сбросить
 							</Button>
@@ -205,7 +213,7 @@ const Main = () => {
 				<Select
 					value={activeProject ? activeProject.label : null}
 					showSearch
-					style={{ width: 200, marginLeft: 8 }}
+					style={{ width: 202, marginLeft: 8 }}
 					placeholder="Выбрать проект"
 					optionFilterProp="label"
 					onChange={onSelectProject}
@@ -214,38 +222,19 @@ const Main = () => {
 						option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
 					}></Select>
 			</div>
-			<div className="site-layout-background">
-				{isLoading ? (
+			<div className="box">
+				{projectLoading ? (
 					<Loader />
 				) : tableData ? (
 					<>
-						<div className="project-actions">
-							<div>Всего записей: {tablePaginationConfig.total}</div>
-							{activeProject && (
-								<ExportButton
-									activeProject={activeProject.value}
-									searchParams={searchParams}
-								/>
-							)}
-						</div>
-						<Table
-							rowKey={(record) => record.id}
-							columns={tableColumns}
-							dataSource={tableData}
-							loading={tableLoading}
-							pagination={{
-								current: tablePaginationConfig.current_page,
-								total: tablePaginationConfig.total,
-								pageSize: tablePaginationConfig.per_page,
-								onChange: onChangeTablePage,
-							}}
-						/>
+						<TableControls />
+						<ProjectTable />
 					</>
 				) : (
 					<h1 style={{ textAlign: 'center', marginBottom: 0 }}>Выберите проект</h1>
 				)}
 			</div>
-			<BackTop />
+			<BackTop duration={800} />
 		</>
 	);
 };

@@ -1,12 +1,14 @@
 import React from 'react';
 import { Form, Input, Button, Select, Checkbox, message } from 'antd';
-import { Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import axios from 'axios';
+import ResourceHeader from '../../components/ResourceHeader';
 
 const CreateProject = () => {
 	const [userList, setUserList] = React.useState([]);
 	const [projectUser, setProjectUser] = React.useState([]);
 	const [isLoading, setIsLoading] = React.useState(false);
+	let history = useHistory();
 
 	React.useEffect(() => {
 		axios
@@ -17,7 +19,7 @@ const CreateProject = () => {
 				});
 				setUserList(newData);
 			})
-			.finally(() => console.log('users fetched'));
+			.catch(() => message.error('Произошла ошибка'));
 	}, []);
 
 	const onFinish = (values) => {
@@ -26,13 +28,10 @@ const CreateProject = () => {
 		axios
 			.post('/projects', newProject)
 			.then(({ data }) => {
-				console.log(data);
-				message.success('Проект успешно добавлен');
+				message.success(data.message);
+				history.push('/projects');
 			})
-			.catch((rsp) => {
-				console.log(rsp);
-				message.error('Произошла ошибка');
-			})
+			.catch(() => message.error('Произошла ошибка'))
 			.finally(() => setIsLoading(false));
 	};
 
@@ -42,13 +41,8 @@ const CreateProject = () => {
 
 	return (
 		<>
-			<div className="controls box" style={{ padding: '14px 25px' }}>
-				<b>Новый проект</b>
-				<Button type="primary" style={{ marginLeft: 'auto' }}>
-					<Link to={'/projects'}>Назад</Link>
-				</Button>
-			</div>
-			<div className="box" style={{ marginTop: 20 }}>
+			<ResourceHeader title="Новый проект" path="/projects" lintText="Назад" />
+			<div className="box">
 				<Form
 					name="basic"
 					onFinish={onFinish}

@@ -3,9 +3,14 @@ import { Button } from 'antd';
 import { ExportOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { useHistory } from 'react-router-dom';
+//Redux
+import { useDispatch } from 'react-redux';
+import { resetStorage } from '../redux/actions/projects';
 
 const Logout = ({ onLogout }) => {
+	const dispatch = useDispatch();
 	let history = useHistory();
+
 	const [isLoading, setIsLoading] = React.useState(false);
 
 	const handleLogout = () => {
@@ -15,6 +20,7 @@ const Logout = ({ onLogout }) => {
 			.then(() => {
 				localStorage.clear();
 				onLogout();
+				dispatch(resetStorage());
 				history.push('/');
 			})
 			.catch(() => console.log('logout catch error'))

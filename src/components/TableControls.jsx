@@ -9,7 +9,9 @@ const TableControls = () => {
 
 	return (
 		<div className="project-actions">
-			<div>Всего записей: {tablePaginationConfig.total}</div>
+			<div>
+				<span>Всего записей:</span> {tablePaginationConfig.total}
+			</div>
 			<ExportButton activeProject={activeProject.value} searchParams={searchParams} />
 		</div>
 	);

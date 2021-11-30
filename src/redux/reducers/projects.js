@@ -7,10 +7,14 @@ const initialState = {
 	tableData: null,
 	tablePaginationConfig: null,
 	searchParams: null,
+	userInfo: null,
 };
 
 const pizzas = (state = initialState, action) => {
 	switch (action.type) {
+		case 'SET_USER_INFO':
+			return { ...state, userInfo: action.payload };
+
 		case 'SET_ACTIVE_PROJECT':
 			return { ...state, activeProject: action.payload };
 

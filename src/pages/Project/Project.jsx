@@ -4,6 +4,7 @@ import { Table, Space, Button, Tag, message } from 'antd';
 import { Link } from 'react-router-dom';
 import { CheckCircleTwoTone, CloseCircleTwoTone } from '@ant-design/icons';
 import Loader from '../../components/Loader';
+import ResourceHeader from '../../components/ResourceHeader';
 
 const Project = () => {
 	const [projectList, setProjectList] = React.useState([]);
@@ -29,7 +30,7 @@ const Project = () => {
 				setProjectList(newProjectList);
 				message.success(data.message);
 			})
-			.catch((err) => console.log(err))
+			.catch(() => message.error('Ошибка при удалении проекта'))
 			.finally(() => {
 				thisButton.innerText = 'Удалить';
 			});
@@ -47,8 +48,15 @@ const Project = () => {
 			key: 'tablename',
 		},
 		{
+			title: 'Заголовок таблицы',
+			dataIndex: 'base_header',
+			width: 700,
+			key: 'base_header',
+		},
+		{
 			title: 'Изменения',
 			dataIndex: 'changes',
+			width: 103,
 			key: 'changes',
 			render: (changes) => {
 				return (
@@ -92,7 +100,10 @@ const Project = () => {
 			render: (_, record) => (
 				<Space size="middle">
 					<Link to={`/projects/${record.id}/edit`}>Ред</Link>
-					<Button type="link" onClick={(e) => onDeleteProject(e, record.id)}>
+					<Button
+						type="link"
+						className="btn-link"
+						onClick={(e) => onDeleteProject(e, record.id)}>
 						Удалить
 					</Button>
 				</Space>
@@ -102,13 +113,12 @@ const Project = () => {
 
 	return (
 		<>
-			<div className="controls box" style={{ padding: '14px 25px' }}>
-				<b>Список проектов</b>
-				<Button type="primary" style={{ marginLeft: 'auto' }}>
-					<Link to={'/projects/create'}>Добавить проект</Link>
-				</Button>
-			</div>
-			<div className="box" style={{ marginTop: 20 }}>
+			<ResourceHeader
+				title="Список проектов"
+				path="/projects/create"
+				lintText="Добавить проект"
+			/>
+			<div className="box">
 				{isLoading ? (
 					<Loader />
 				) : (

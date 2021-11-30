@@ -1,10 +1,14 @@
 import React from 'react';
 import { Form, Input, Button, Checkbox, message } from 'antd';
-import { Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import axios from 'axios';
+
+import ResourceHeader from '../../components/ResourceHeader';
 
 const User = () => {
 	const [isLoading, setIsLoading] = React.useState(false);
+
+	let history = useHistory();
 
 	const onFinish = (values) => {
 		setIsLoading(true);
@@ -12,6 +16,7 @@ const User = () => {
 			.post('/users', values)
 			.then(({ data }) => {
 				message.success(data.message);
+				history.push('/users');
 			})
 			.catch(() => {
 				message.error('Произошла ошибка');
@@ -21,13 +26,8 @@ const User = () => {
 
 	return (
 		<>
-			<div className="controls box" style={{ padding: '14px 25px' }}>
-				<b>Новый пользователь</b>
-				<Button type="primary" style={{ marginLeft: 'auto' }}>
-					<Link to={'/users'}>Назад</Link>
-				</Button>
-			</div>
-			<div className="box" style={{ marginTop: 20 }}>
+			<ResourceHeader title="Новый пользователь" path="/users" lintText="Назад" />
+			<div className="box">
 				<Form
 					name="basic"
 					onFinish={onFinish}

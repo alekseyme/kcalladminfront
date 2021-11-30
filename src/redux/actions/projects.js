@@ -1,4 +1,10 @@
 import axios from 'axios';
+import { message } from 'antd';
+
+export const setUserInfo = (payload) => ({
+	type: 'SET_USER_INFO',
+	payload,
+});
 
 export const setActiveProject = (payload) => ({
 	type: 'SET_ACTIVE_PROJECT',
@@ -68,7 +74,7 @@ export const fetchActiveProject = (parameters, activeProject) => (dispatch) => {
 			dispatch(setTableData(data.paginate.data));
 			dispatch(setProjectStatuses(statuses));
 		})
-		.catch(() => alert('ошибка запроса'))
+		.catch(() => message.error('Ошибка запроса'))
 		.finally(() => {
 			dispatch(setTableLoading(false));
 			dispatch(setProjectLoading(false));

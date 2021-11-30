@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { Table, Space, Button, Tag, message } from 'antd';
+import { Table, Space, Tag, Button, message } from 'antd';
+
 import Loader from '../../components/Loader';
+import ResourceHeader from '../../components/ResourceHeader';
 
 const User = () => {
 	const [userList, setUserList] = React.useState([]);
@@ -28,10 +30,23 @@ const User = () => {
 				setUserList(newUserList);
 				message.success(data.message);
 			})
-			.catch((err) => console.log(err))
+			.catch(() => message.error('Ошибка при удалении пользователя'))
 			.finally(() => {
 				thisButton.innerText = 'Удалить';
 			});
+	};
+
+	const onResetPassword = (userId) => {
+		const newPwd = prompt('Введите новый пароль');
+
+		if (newPwd) {
+			axios
+				.patch(`/user/changepwd`, { userid: userId, password: newPwd })
+				.then(({ data }) => {
+					message.success(data.message);
+				})
+				.catch(() => message.error('Ошибка при смене пароля'));
+		}
 	};
 
 	const columns = [
@@ -64,8 +79,17 @@ const User = () => {
 			render: (_, record) => (
 				<Space size="middle">
 					<Link to={`/users/${record.id}/edit`}>Ред</Link>
-					<Button type="link" onClick={(e) => onDeleteUser(e, record.id)}>
+					<Button
+						type="link"
+						className="btn-link"
+						onClick={(e) => onDeleteUser(e, record.id)}>
 						Удалить
+					</Button>
+					<Button
+						type="link"
+						className="btn-link"
+						onClick={() => onResetPassword(record.id)}>
+						Сменить пароль
 					</Button>
 				</Space>
 			),
@@ -74,13 +98,13 @@ const User = () => {
 
 	return (
 		<>
-			<div className="controls box" style={{ padding: '14px 25px' }}>
-				<b>Список пользователей</b>
-				<Button type="primary" style={{ marginLeft: 'auto' }}>
-					<Link to={'/users/create'}>Добавить пользователя</Link>
-				</Button>
-			</div>
-			<div className="box" style={{ marginTop: 20 }}>
+			<ResourceHeader
+				title="Список пользователей"
+				path="/users/create"
+				lintText="Добавить пользователя"
+			/>
+
+			<div className="box">
 				{isLoading ? (
 					<Loader />
 				) : (
