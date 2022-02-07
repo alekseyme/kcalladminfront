@@ -1,8 +1,9 @@
 import React from 'react';
 import { DatePicker, Form, Input, Button, Select, BackTop, message } from 'antd';
-import { PhoneOutlined } from '@ant-design/icons';
+import { PhoneOutlined, UserOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import moment from 'moment';
+import 'moment/locale/ru';
 
 //Redux
 import {
@@ -57,13 +58,23 @@ const Main = () => {
 			message.warning('Сначала выберите проект', 2);
 			return;
 		}
-		if (!fieldsValue.from && !fieldsValue.to && !fieldsValue.phone && !fieldsValue.status) {
+		if (
+			!fieldsValue.from &&
+			!fieldsValue.to &&
+			!fieldsValue.phone &&
+			!fieldsValue.status &&
+			!fieldsValue.operator
+		) {
 			message.warning('Заполните хотя бы один параметр поиска', 2);
 			return;
 		}
 
+		const phone =
+			fieldsValue.phone?.length > 10 ? fieldsValue.phone.slice(1) : fieldsValue.phone;
+
 		const values = {
 			...fieldsValue,
+			phone: phone,
 			from: fieldsValue['from'] ? fieldsValue['from'].format('YYYY-MM-DD') : null,
 			to: fieldsValue['to'] ? fieldsValue['to'].format('YYYY-MM-DD') : null,
 		};
@@ -75,6 +86,7 @@ const Main = () => {
 				from: values.from,
 				to: values.to,
 				phone: values.phone,
+				operator: values.operator,
 				status: values.status,
 			}),
 		);
@@ -83,6 +95,7 @@ const Main = () => {
 			from: values.from,
 			to: values.to,
 			phone: values.phone,
+			operator: values.operator,
 			status: values.status,
 		};
 		dispatch(fetchActiveProject(parameters));
@@ -184,6 +197,13 @@ const Main = () => {
 							allowClear
 						/>
 					</Form.Item>
+					<Form.Item name="operator">
+						<Input
+							placeholder="Оператор"
+							prefix={<UserOutlined style={{ color: 'rgba(0, 0, 0, 0.25)' }} />}
+							allowClear
+						/>
+					</Form.Item>
 					<Form.Item name="status">
 						<Select
 							placeholder="Статус"
@@ -201,7 +221,7 @@ const Main = () => {
 						<Form.Item>
 							<Button
 								onClick={() => {
-									dispatch(setProjectLoading(true));
+									dispatch(setTableLoading(true));
 									resetSearch();
 									dispatch(fetchActiveProject(null, activeProject.value));
 								}}>

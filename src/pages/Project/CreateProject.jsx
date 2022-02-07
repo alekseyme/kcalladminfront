@@ -19,7 +19,7 @@ const CreateProject = () => {
 				});
 				setUserList(newData);
 			})
-			.catch(() => message.error('Произошла ошибка'));
+			.catch(() => message.error('Ошибка загрузки списка пользователей'));
 	}, []);
 
 	const onFinish = (values) => {
@@ -31,7 +31,7 @@ const CreateProject = () => {
 				message.success(data.message);
 				history.push('/projects');
 			})
-			.catch(() => message.error('Произошла ошибка'))
+			.catch(() => message.error('Произошла ошибка при создании проекта'))
 			.finally(() => setIsLoading(false));
 	};
 

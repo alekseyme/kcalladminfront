@@ -16,6 +16,7 @@ const Project = () => {
 			.then(({ data }) => {
 				setProjectList(data);
 			})
+			.catch(() => message.error('Ошибка при загрузке списка проектов'))
 			.finally(() => setIsLoading(false));
 	}, []);
 

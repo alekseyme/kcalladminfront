@@ -5,12 +5,12 @@
 	min-height: 100%;
 }
 body {
-	background: #f0f2f5;
+	background: #edeef0;
 }
 .ant-layout {
 	min-height: 100%;
 	padding-bottom: 24px;
-	background: #f0f2f5;
+	background: #edeef0;
 }
 .ant-layout-header {
 	height: 52px;
@@ -71,7 +71,7 @@ body {
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	background: #f0f2f5;
+	background: #edeef0;
 	padding: 0 15px;
 }
 .login-form {
@@ -110,4 +110,8 @@ body {
 }
 .form-modal-textarea {
 	resize: none;
+}
+.user-box {
+	display: flex;
+	align-items: center;
 }

@@ -22,7 +22,7 @@ const EditProject = () => {
 				});
 				setUsertList(newData);
 			})
-			.catch(() => message.error('Произошла ошибка'));
+			.catch(() => message.error('Ошибка загрузки списка пользователей'));
 	}, []);
 
 	let history = useHistory();
@@ -37,7 +37,7 @@ const EditProject = () => {
 					setProjectUser(projectUser);
 				}
 			})
-			.catch(() => message.error('Ошибка редактирования проекта'))
+			.catch(() => message.error('Ошибка загрузки данных по текущему проекту'))
 			.finally(() => {
 				setIsLoadingPage(false);
 			});
@@ -52,9 +52,7 @@ const EditProject = () => {
 				message.success(data.message);
 				history.push('/projects');
 			})
-			.catch(() => {
-				message.error('Произошла ошибка');
-			})
+			.catch(() => message.error('Ошибка редактирования проекта'))
 			.finally(() => setIsLoading(false));
 	};
 

@@ -13,6 +13,8 @@ const Home = ({ onSuccessLogout }) => {
 	let location = useLocation();
 	const { userInfo } = useSelector(({ projects }) => projects);
 
+	const isAdmin = userInfo.isadmin === 1;
+
 	return (
 		<Layout>
 			<Header>
@@ -30,7 +32,7 @@ const Home = ({ onSuccessLogout }) => {
 						</Menu.Item>
 						{
 							//Админ
-							userInfo.isadmin === 1 && (
+							isAdmin && (
 								<>
 									<Menu.Item key="/projects">
 										<Link to="/projects">
@@ -58,7 +60,7 @@ const Home = ({ onSuccessLogout }) => {
 					</Route>
 					{
 						//Админ
-						userInfo.isadmin === 1 && (
+						isAdmin && (
 							<Switch>
 								<Route exact path="/projects">
 									<Project />
