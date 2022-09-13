@@ -1,46 +1,50 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
-import { Table, Space, Tag, Button, message } from 'antd';
-
-import Loader from '../../components/Loader';
-import ResourceHeader from '../../components/ResourceHeader';
+import api from 'util/api';
+import roles from 'util/roles';
+import { Table, Space, Tag, Button, PageHeader, Popconfirm, Tooltip, message } from 'antd';
+import { KeyOutlined, EditTwoTone, DeleteTwoTone } from '@ant-design/icons';
+import { Box, BoxTitle, ResourceLoader } from 'components';
+//Redux
+import { useSelector, useDispatch } from 'react-redux';
+import { deleteUser, fetchUsers, selectUsers } from 'store/users/slice';
 
 const User = () => {
-	const [userList, setUserList] = React.useState([]);
-	const [isLoading, setIsLoading] = React.useState(true);
+	const dispatch = useDispatch();
+	const { items, status } = useSelector(selectUsers);
+	const [isUserReload, setIsUserReload] = React.useState(false);
+
+	const isIdle = status === 'idle';
 
 	React.useEffect(() => {
-		axios
-			.get('/users')
-			.then(({ data }) => {
-				setUserList(data);
-			})
-			.finally(() => setIsLoading(false));
+		if (isIdle) {
+			getUsers();
+		} // eslint-disable-next-line
 	}, []);
 
-	const onDeleteUser = (e, userId) => {
-		const thisButton = e.currentTarget;
-		thisButton.innerText = 'Удаляю';
+	const getUsers = async () => {
+		await dispatch(fetchUsers()).unwrap();
+		setIsUserReload(false);
+	};
 
-		axios
-			.delete(`/users/${userId}`)
-			.then(({ data }) => {
-				const newUserList = userList.filter((user) => user.id !== userId);
-				setUserList(newUserList);
-				message.success(data.message);
-			})
-			.catch(() => message.error('Ошибка при удалении пользователя'))
-			.finally(() => {
-				thisButton.innerText = 'Удалить';
-			});
+	const onUserListReload = () => {
+		setIsUserReload(true);
+		getUsers();
+	};
+
+	const onDeleteUser = async (_, userId) => {
+		try {
+			await dispatch(deleteUser(userId)).unwrap();
+		} catch (err) {
+			message.error('Ошибка при удалении пользователя');
+		}
 	};
 
 	const onResetPassword = (userId) => {
 		const newPwd = prompt('Введите новый пароль');
 
 		if (newPwd) {
-			axios
+			api()
 				.patch(`/user/changepwd`, { userid: userId, password: newPwd })
 				.then(({ data }) => {
 					message.success(data.message);
@@ -57,9 +61,9 @@ const User = () => {
 			render: (_, record) => {
 				return (
 					<>
-						{record.isadmin ? (
+						{record.role === 0 || record.role === 1 ? (
 							<>
-								{record.name} <Tag>admin</Tag>
+								{record.name} <Tag>{roles[record.role].label}</Tag>
 							</>
 						) : (
 							record.name
@@ -72,25 +76,36 @@ const User = () => {
 			title: 'Логин',
 			dataIndex: 'username',
 			key: 'username',
+			ellipsis: true,
 		},
 		{
-			title: 'Действия',
+			title: '#',
 			key: 'action',
+			width: 130,
+			align: 'center',
 			render: (_, record) => (
 				<Space size="middle">
-					<Link to={`/users/${record.id}/edit`}>Ред</Link>
-					<Button
-						type="link"
-						className="btn-link"
-						onClick={(e) => onDeleteUser(e, record.id)}>
-						Удалить
-					</Button>
-					<Button
-						type="link"
-						className="btn-link"
-						onClick={() => onResetPassword(record.id)}>
-						Сменить пароль
-					</Button>
+					<Link to={`/users/${record.id}/edit`}>
+						<EditTwoTone style={{ fontSize: '20px' }} />
+					</Link>
+					<Popconfirm
+						title="Вы уверены, что хотите удалить пользователя?"
+						onConfirm={(e) => onDeleteUser(e, record.id)}
+						placement="topRight"
+						okText="Да"
+						cancelText="Отмена">
+						<Button type="link" className="btn-link">
+							<DeleteTwoTone twoToneColor="#f5222d" style={{ fontSize: '20px' }} />
+						</Button>
+					</Popconfirm>
+					<Tooltip title="Смена пароля">
+						<Button
+							type="link"
+							className="btn-link"
+							onClick={() => onResetPassword(record.id)}>
+							<KeyOutlined style={{ fontSize: '20px' }} />
+						</Button>
+					</Tooltip>
 				</Space>
 			),
 		},
@@ -98,25 +113,32 @@ const User = () => {
 
 	return (
 		<>
-			<ResourceHeader
-				title="Список пользователей"
-				path="/users/create"
-				lintText="Добавить пользователя"
-			/>
-
-			<div className="box">
-				{isLoading ? (
-					<Loader />
+			<PageHeader className="page-header" title="Управление пользователями" />
+			<Box>
+				{isIdle ? (
+					<ResourceLoader />
 				) : (
-					<Table
-						style={{ width: '100%' }}
-						rowKey={(record) => record.id}
-						columns={columns}
-						dataSource={userList}
-						pagination={{ hideOnSinglePage: true }}
-					/>
+					<>
+						<BoxTitle
+							text="Пользователи"
+							linkText="Создать пользователя"
+							path="/users/create"
+							onReload={onUserListReload}
+							resourceCount={items?.length}
+							spin={isUserReload}
+							reloadable
+						/>
+						<Table
+							style={{ width: '100%' }}
+							rowKey={(record) => record.id}
+							columns={columns}
+							loading={isUserReload}
+							dataSource={items}
+							pagination={{ hideOnSinglePage: true }}
+						/>
+					</>
 				)}
-			</div>
+			</Box>
 		</>
 	);
 };

@@ -1,0 +1,10 @@
+.main {
+	margin: 24px 24px 0;
+	padding: 24px;
+	background: #fff;
+	border-radius: 2px;
+	box-shadow: 2px 0 8px 0 rgba(29, 35, 41, 0.05);
+}
+.compact {
+	padding: 0;
+}

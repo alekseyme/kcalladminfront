@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from 'antd';
 import { DownloadOutlined } from '@ant-design/icons';
 import * as XLSX from 'xlsx';
-import axios from 'axios';
+import { TableApi } from 'api';
 
 const ExportButton = ({ activeProject, searchParams }) => {
 	const [isLoading, setIsLoading] = React.useState(false);
@@ -10,7 +10,7 @@ const ExportButton = ({ activeProject, searchParams }) => {
 	const fileExtension = '.xlsx';
 
 	const newExport = (csvData) => {
-		const headerArr = activeProject.base_header.split(',');
+		const headerArr = activeProject.table_header.split(',');
 
 		const wb = XLSX.utils.book_new();
 		const ws = XLSX.utils.json_to_sheet([]);
@@ -20,17 +20,21 @@ const ExportButton = ({ activeProject, searchParams }) => {
 		XLSX.writeFile(wb, activeProject.label + `_${Date.now()}` + fileExtension);
 	};
 
-	const fetchData = () => {
+	const fetchData = async () => {
 		setIsLoading(true);
-		const params = {
-			...searchParams,
-			project: activeProject.value,
-			fields: activeProject.base_row.split(','),
-		};
-		axios
-			.post('/project/export', params)
-			.then(({ data }) => newExport(data))
-			.finally(() => setIsLoading(false));
+		try {
+			const params = {
+				...searchParams,
+				project: activeProject.value,
+				fields: activeProject.table_row.split(','),
+			};
+
+			const data = await TableApi.exportData(params);
+			newExport(data);
+		} catch (error) {
+		} finally {
+			setIsLoading(false);
+		}
 	};
 
 	return (

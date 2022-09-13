@@ -1,12 +1,10 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import ExportButton from './ExportButton';
-import ReloadButton from './ReloadButton';
+import { ExportButton, ReloadButton } from 'components';
 
 const TableControls = () => {
-	const { activeProject, tablePaginationConfig, searchParams } = useSelector(
-		({ projects }) => projects,
-	);
+	const { activeProject, searchParams } = useSelector(({ projects }) => projects);
+	const { tablePaginationConfig } = useSelector(({ table }) => table);
 
 	return (
 		<div className="project-actions">

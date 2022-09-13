@@ -1,5 +1,5 @@
 export { default as Main } from './Main/Main';
-export { default as Home } from './Home';
+export { default as Home } from './Home/Home';
 // Project
 export { default as EditProject } from './Project/EditProject';
 export { default as CreateProject } from './Project/CreateProject';

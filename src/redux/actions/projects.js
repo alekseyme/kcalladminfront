@@ -1,10 +1,6 @@
-import axios from 'axios';
+import api from 'util/api';
 import { message } from 'antd';
-
-export const setUserInfo = (payload) => ({
-	type: 'SET_USER_INFO',
-	payload,
-});
+import { setTableLoading, setTableData, setTablePaginationConfig } from 'store/table/slice';
 
 export const setActiveProject = (payload) => ({
 	type: 'SET_ACTIVE_PROJECT',
@@ -16,32 +12,13 @@ export const setProjectLoading = (payload) => ({
 	payload,
 });
 
+export const setProjectList = (payload) => ({
+	type: 'SET_PROJECT_LIST',
+	payload,
+});
+
 export const setProjectStatuses = (payload) => ({
 	type: 'SET_PROJECT_STATUSES',
-	payload,
-});
-
-export const setTableLoading = (payload) => ({
-	type: 'SET_TABLE_LOADING',
-	payload,
-});
-
-export const setTableColumns = (payload) => ({
-	type: 'SET_TABLE_COLUMNS',
-	payload,
-});
-
-export const setTableData = (payload) => ({
-	type: 'SET_TABLE_DATA',
-	payload,
-});
-
-export const resetTableData = () => ({
-	type: 'RESET_TABLE_DATA',
-});
-
-export const setTablePaginationConfig = (payload) => ({
-	type: 'SET_TABLE_PAGINATIONCONFIG',
 	payload,
 });
 
@@ -57,7 +34,7 @@ export const resetStorage = () => ({
 export const fetchActiveProject = (parameters, activeProject) => (dispatch) => {
 	const params = parameters || { project: activeProject };
 
-	axios
+	api()
 		.post('/project/search', params)
 		.then(({ data }) => {
 			const tableConfig = {
@@ -80,3 +57,32 @@ export const fetchActiveProject = (parameters, activeProject) => (dispatch) => {
 			dispatch(setProjectLoading(false));
 		});
 };
+
+// export const setUserInfo = (payload) => ({
+// 	type: 'SET_USER_INFO',
+// 	payload,
+// });
+
+// export const setTableLoading = (payload) => ({
+// 	type: 'SET_TABLE_LOADING',
+// 	payload,
+// });
+
+// export const setTableColumns = (payload) => ({
+// 	type: 'SET_TABLE_COLUMNS',
+// 	payload,
+// });
+
+// export const setTableData = (payload) => ({
+// 	type: 'SET_TABLE_DATA',
+// 	payload,
+// });
+
+// export const resetTableData = () => ({
+// 	type: 'RESET_TABLE_DATA',
+// });
+
+// export const setTablePaginationConfig = (payload) => ({
+// 	type: 'SET_TABLE_PAGINATIONCONFIG',
+// 	payload,
+// });

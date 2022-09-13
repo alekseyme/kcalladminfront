@@ -1,55 +1,60 @@
 import React from 'react';
 import { DatePicker, Form, Input, Button, Select, BackTop, message } from 'antd';
 import { PhoneOutlined, UserOutlined } from '@ant-design/icons';
-import axios from 'axios';
+import { UserApi } from 'api';
 import moment from 'moment';
 import 'moment/locale/ru';
 
 //Redux
 import {
 	setActiveProject,
-	setTableColumns,
-	resetTableData,
 	setSearchParams,
 	fetchActiveProject,
 	setProjectLoading,
-	setTableLoading,
-} from '../../redux/actions/projects';
+} from 'store/projects/slice';
+import { setTableColumns, resetTableData, setTableLoading } from 'store/table/slice';
 import { useSelector, useDispatch } from 'react-redux';
 
-import Loader from '../../components/Loader';
-import TableControls from '../../components/TableControls';
-import ProjectTable from '../../components/ProjectTable';
+import { Box, Loader, TableControls, ProjectTable, EmptyProject } from 'components';
 
 const Main = () => {
 	//Redux
 	const dispatch = useDispatch();
-	const { activeProject, projectLoading, tableData, searchParams, projectStatuses } = useSelector(
+	const { activeProject, projectLoading, searchParams, projectStatuses } = useSelector(
 		({ projects }) => projects,
 	);
+	const { tableData } = useSelector(({ table }) => table);
 	const [projectList, setProjectList] = React.useState(null);
 	const [searchForm] = Form.useForm();
 
-	//Подгрузка списка проектов, доступных для пользователя, в селект
-	React.useEffect(() => {
-		axios.post('/userprojects').then(({ data }) => {
+	const getUserProjects = async () => {
+		try {
+			const data = await UserApi.getUserProjects();
 			const projects = data.map((project) => {
 				return {
 					id: project.id,
+					key: project.id,
 					value: project.tablename,
 					label: project.name,
-					base_header: project.base_header,
-					base_row: project.base_row,
+					table_header: project.table_header,
+					table_row: project.table_row,
 				};
 			});
 			setProjectList(projects);
-		});
+		} catch (error) {
+			message.error(error.message);
+		}
+	};
+
+	//Подгрузка списка проектов, доступных для пользователя, в селект
+	React.useEffect(() => {
+		getUserProjects();
 	}, []);
 
 	//Меняем активный проект, при смене в селекте
 	React.useEffect(() => {
 		if (activeProject && !tableData) {
-			dispatch(fetchActiveProject(null, activeProject.value));
+			dispatch(fetchActiveProject({ project: activeProject.value }));
 		} // eslint-disable-next-line
 	}, [activeProject]);
 
@@ -112,20 +117,6 @@ const Main = () => {
 				return 34; //def 50, mid 34
 			case 'time':
 				return 151; //def 168, mid 151
-			// case 'que':
-			// 	return 151; //def 168, mid 151
-			// case 'operator':
-			// 	return 151; //def 168, mid 151
-			// case 'typeo':
-			// 	return 151; //def 121, mid 105
-			// case 'status':
-			// 	return 151; //def 121, mid 105
-			// case 'number':
-			// 	return 105; //def 121, mid 105
-			// case 'name':
-			// 	return 105; //def 121, mid 105
-			// case 'phone_contact':
-			// 	return 105; //def 121, mid 105
 			case 'content':
 				return 300; //def 300, mid 300
 
@@ -134,17 +125,19 @@ const Main = () => {
 		}
 	};
 
-	const onSelectProject = (_, optionObj) => {
+	const onSelectProject = async (_, optionObj) => {
 		dispatch(setProjectLoading(true));
 		resetSearch();
 
-		const headerArr = optionObj.base_header.split(',');
-		const rowArr = optionObj.base_row.split(',');
+		const headerArr = optionObj.table_header.split(',');
+		const rowArr = optionObj.table_row.split(',');
 
-		const tableCols = headerArr.map((col, i) => ({
+		const tableCols = await headerArr.map((col, i) => ({
 			title: col,
 			dataIndex: rowArr[i],
 			width: headerArr.length > 7 ? getTableRowWidth(rowArr[i]) : 148,
+			// render: rowArr[i] === 'time' ? (time) => moment(time).format('DD.MM.YYYY H:mm') : false,
+
 			editable:
 				rowArr[i] === 'id' ||
 				rowArr[i] === 'time' ||
@@ -161,88 +154,93 @@ const Main = () => {
 
 	return (
 		<>
-			<div className="controls box">
-				<Form
-					form={searchForm}
-					onFinish={fetchSearchData}
-					autoComplete="off"
-					initialValues={{
-						from:
-							searchParams && searchParams.from
-								? moment(searchParams.from, 'YYYY-MM-DD')
-								: null,
-						to:
-							searchParams && searchParams.to
-								? moment(searchParams.to, 'YYYY-MM-DD')
-								: null,
-						phone: searchParams ? searchParams.phone : null,
-						status: searchParams ? searchParams.status : null,
-					}}
-					layout="inline">
-					<Form.Item name="from">
-						<DatePicker placeholder="С" />
-					</Form.Item>
-					<Form.Item name="to">
-						<DatePicker placeholder="По" />
-					</Form.Item>
-					<Form.Item name="phone">
-						<Input
-							placeholder="Телефон"
-							prefix={
-								<PhoneOutlined
-									style={{ color: 'rgba(0, 0, 0, 0.25)' }}
-									rotate={90}
-								/>
-							}
-							allowClear
-						/>
-					</Form.Item>
-					<Form.Item name="operator">
-						<Input
-							placeholder="Оператор"
-							prefix={<UserOutlined style={{ color: 'rgba(0, 0, 0, 0.25)' }} />}
-							allowClear
-						/>
-					</Form.Item>
-					<Form.Item name="status">
-						<Select
-							placeholder="Статус"
-							style={{ width: 202 }}
-							options={projectStatuses || null}
-							allowClear
-						/>
-					</Form.Item>
-					<Form.Item>
-						<Button type="primary" htmlType="submit">
-							Поиск
-						</Button>
-					</Form.Item>
-					{searchParams && (
+			<Box>
+				<div className="controls">
+					<Form
+						form={searchForm}
+						onFinish={fetchSearchData}
+						autoComplete="off"
+						initialValues={{
+							from:
+								searchParams && searchParams.from
+									? moment(searchParams.from, 'YYYY-MM-DD')
+									: null,
+							to:
+								searchParams && searchParams.to
+									? moment(searchParams.to, 'YYYY-MM-DD')
+									: null,
+							phone: searchParams ? searchParams.phone : null,
+							status: searchParams ? searchParams.status : null,
+						}}
+						layout="inline">
+						<Form.Item name="from">
+							<DatePicker placeholder="С" />
+						</Form.Item>
+						<Form.Item name="to">
+							<DatePicker placeholder="По" />
+						</Form.Item>
+						<Form.Item name="phone">
+							<Input
+								placeholder="Телефон"
+								prefix={
+									<PhoneOutlined
+										style={{ color: 'rgba(0, 0, 0, 0.25)' }}
+										rotate={90}
+									/>
+								}
+								allowClear
+							/>
+						</Form.Item>
+						<Form.Item name="operator">
+							<Input
+								placeholder="Оператор"
+								prefix={<UserOutlined style={{ color: 'rgba(0, 0, 0, 0.25)' }} />}
+								allowClear
+							/>
+						</Form.Item>
+						<Form.Item name="status">
+							<Select
+								placeholder="Статус"
+								style={{ width: 202 }}
+								options={projectStatuses || null}
+								allowClear
+							/>
+						</Form.Item>
 						<Form.Item>
-							<Button
-								onClick={() => {
-									dispatch(setTableLoading(true));
-									resetSearch();
-									dispatch(fetchActiveProject(null, activeProject.value));
-								}}>
-								Сбросить
+							<Button type="primary" htmlType="submit">
+								Поиск
 							</Button>
 						</Form.Item>
-					)}
-				</Form>
-				<Select
-					value={activeProject ? activeProject.label : null}
-					showSearch
-					style={{ width: 202, marginLeft: 8 }}
-					placeholder="Выбрать проект"
-					optionFilterProp="label"
-					onChange={onSelectProject}
-					options={projectList}
-					filterOption={(input, option) =>
-						option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
-					}></Select>
-			</div>
-			<div className="box">
+						{searchParams && (
+							<Form.Item>
+								<Button
+									onClick={() => {
+										dispatch(setTableLoading(true));
+										resetSearch();
+										dispatch(
+											fetchActiveProject({ project: activeProject.value }),
+										);
+									}}>
+									Сбросить
+								</Button>
+							</Form.Item>
+						)}
+					</Form>
+					<Select
+						value={activeProject ? activeProject.label : null}
+						showSearch
+						style={{ width: 202, marginLeft: 8 }}
+						placeholder="Выбрать проект"
+						optionFilterProp="label"
+						onChange={onSelectProject}
+						options={projectList}
+						filterOption={(input, option) =>
+							option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
+						}
+					/>
+				</div>
+			</Box>
+			<Box>
 				{projectLoading ? (
 					<Loader />
 				) : tableData ? (
@@ -251,9 +249,9 @@ const Main = () => {
 						<ProjectTable />
 					</>
 				) : (
-					<h1 style={{ textAlign: 'center', marginBottom: 0 }}>Выберите проект</h1>
+					<EmptyProject />
 				)}
-			</div>
+			</Box>
 			<BackTop duration={800} />
 		</>
 	);

@@ -1,7 +1,8 @@
 import React from 'react';
 import { Button } from 'antd';
 
-import { fetchActiveProject, setTableLoading } from '../redux/actions/projects';
+import { fetchActiveProject } from 'store/projects/slice';
+import { setTableLoading } from 'store/table/slice';
 import { useDispatch } from 'react-redux';
 
 const ReloadButton = ({ activeProject }) => {
@@ -9,7 +10,7 @@ const ReloadButton = ({ activeProject }) => {
 
 	const reloadActiveProject = () => {
 		dispatch(setTableLoading(true));
-		dispatch(fetchActiveProject(null, activeProject.value));
+		dispatch(fetchActiveProject({ project: activeProject.value }));
 	};
 
 	return (

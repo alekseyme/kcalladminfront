@@ -1,34 +1,32 @@
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Form, Input, Button, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
-import axios from 'axios';
+import { AuthApi } from 'api';
 //Redux
 import { useDispatch } from 'react-redux';
-import { setUserInfo } from '../../redux/actions/projects';
+import { setUserInfo } from 'store/user/slice';
 
 const Login = ({ onLogin }) => {
 	const [isLoading, setIsLoading] = React.useState(false);
 	const dispatch = useDispatch();
 
-	let history = useHistory();
+	let navigate = useNavigate();
 
-	const onFinish = (values) => {
+	const onFinish = async (values) => {
 		setIsLoading(true);
-		axios
-			.get('/csrf-cookie')
-			.then(() => {
-				axios
-					.post('/login', values)
-					.then(({ data }) => {
-						localStorage.setItem('auth_name', data.name);
-						dispatch(setUserInfo(data));
-						onLogin();
-						history.push('/');
-					})
-					.catch((error) => message.error(error.response.data.message));
-			})
-			.finally(() => setIsLoading(false));
+		try {
+			await AuthApi.getCsrfCookie();
+			const data = await AuthApi.logIn(values);
+			localStorage.setItem('auth_name', data.name);
+			dispatch(setUserInfo(data));
+			onLogin();
+			navigate('/', { replace: true });
+		} catch (error) {
+			message.error(error.response.data.message);
+		} finally {
+			setIsLoading(false);
+		}
 	};
 
 	return (
